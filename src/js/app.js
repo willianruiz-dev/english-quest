@@ -110,6 +110,15 @@ function _setupNavigation() {
     });
   });
 
+  // Sidebar logo click
+  const logo = document.querySelector('.sidebar__logo');
+  if (logo) {
+    logo.addEventListener('click', (e) => {
+      e.preventDefault();
+      _navigateTo('home');
+    });
+  }
+
   // Custom events (for in-page navigation)
   window.addEventListener('navigate', (e) => {
     const { page, mode } = e.detail;

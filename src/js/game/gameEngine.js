@@ -8,9 +8,10 @@
 
 import { GAME_MODES, UI, REWARDS } from '../core/constants.js';
 import { shuffle, pickRandom, el } from '../core/helpers.js';
-import { getRandomWords } from '../repositories/wordRepository.js';
+import { getRandomWords, getPreloadedTranslation } from '../repositories/wordRepository.js';
 import { translationService } from '../services/translationService.js';
 import { audioService } from '../services/audioService.js';
+import { storageService } from '../services/storageService.js';
 import { scoreManager } from './scoreManager.js';
 import { levelManager } from './levelManager.js';
 import { achievementManager } from './achievementManager.js';
@@ -71,9 +72,14 @@ class GameEngine {
       return this._getMemoryState();
     }
 
-    // Pre-load translations for first batch
+    // Pre-load translations for first batch and apply to word objects
     const firstBatch = this.words.slice(0, questionCount).map(w => w.english);
-    await translationService.translateBatch(firstBatch);
+    const translations = await translationService.translateBatch(firstBatch);
+    for (const word of this.words) {
+      if (!word.translation && translations.has(word.english)) {
+        word.translation = translations.get(word.english);
+      }
+    }
 
     // For time attack, start timer
     if (mode === GAME_MODES.TIME_ATTACK) {
@@ -93,11 +99,15 @@ class GameEngine {
     }
 
     const word = this.words[this.currentQuestion];
+    const wordTranslation = word.translation || getPreloadedTranslation(word.english);
     const distractorPool = this.words.filter(w => w.english !== word.english);
-    const distractors = pickRandom(distractorPool, 3); // 3 wrong + 1 correct
+    const distractors = pickRandom(distractorPool, 3);
     const options = shuffle([
-      { text: word.translation || word.english, correct: true, english: word.english },
-      ...distractors.map(d => ({ text: d.translation || d.english, correct: false })),
+      { text: wordTranslation || word.english, correct: true, english: word.english },
+      ...distractors.map(d => {
+        const dt = d.translation || getPreloadedTranslation(d.english) || d.english;
+        return { text: dt, correct: false };
+      }),
     ]);
 
     this._emit('newQuestion', { index: this.currentQuestion, total: this.totalQuestions, word });
@@ -123,7 +133,7 @@ class GameEngine {
     if (!this.isRunning) return { gameOver: true };
 
     const word = this.words[this.currentQuestion];
-    const correctAnswer = word.translation || word.english;
+    const correctAnswer = word.translation || getPreloadedTranslation(word.english) || word.english;
     const isCorrect = selectedText.trim().toLowerCase() === correctAnswer.toLowerCase();
 
     this.answers.push({ word: word.english, correct: isCorrect, timeMs: 0 });
@@ -132,8 +142,9 @@ class GameEngine {
 
     if (isCorrect) {
       this.correctCount++;
+      this.score += 10;
       const rewards = scoreManager.awardCorrectAnswer();
-      result = { ...result, ...rewards };
+      result = { ...result, ...rewards, score: this.score };
       scoreManager.learnWord(word.english);
 
       // Check for level up
@@ -190,7 +201,7 @@ class GameEngine {
     this.memoryCards = [];
 
     for (const word of pairs) {
-      const translation = word.translation || word.english;
+      const translation = word.translation || getPreloadedTranslation(word.english) || word.english;
       this.memoryCards.push({
         id: `${word.english}_en`,
         pairId: word.english,
@@ -307,13 +318,18 @@ class GameEngine {
       scoreManager.awardPerfectRound();
     }
 
-    // Check achievements
-    const fullData = scoreManager.data;
-    if (fullData) {
-      const newAchievements = achievementManager.checkAchievements(fullData, fullData.achievements || []);
-      if (newAchievements.length > 0) {
-        this._emit('achievementUnlocked', { achievements: newAchievements });
-      }
+    // Increment games played & study time
+    const fullStorage = storageService.load();
+    fullStorage.user.totalGamesPlayed = (fullStorage.user.totalGamesPlayed || 0) + 1;
+    fullStorage.user.totalStudyTime = (fullStorage.user.totalStudyTime || 0) + (this.answers.length * 5);
+    storageService.save(fullStorage);
+
+    // Check and persist achievements
+    const newAchievements = achievementManager.checkAchievements(fullStorage.user, fullStorage.achievements || []);
+    if (newAchievements.length > 0) {
+      fullStorage.achievements = [...(fullStorage.achievements || []), ...newAchievements.map(a => a.id)];
+      storageService.save(fullStorage);
+      this._emit('achievementUnlocked', { achievements: newAchievements });
     }
 
     const result = {

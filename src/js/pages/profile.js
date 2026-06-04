@@ -12,6 +12,7 @@ import { notifications } from '../ui/notifications.js';
 
 export function renderProfilePage(playerData) {
   const container = el('div', { className: 'page-enter' });
+  const fullData = storageService.load();
 
   // ─── Player Info Section ───
   const level = levelManager.getLevelForXP(playerData.xp);
@@ -54,7 +55,7 @@ export function renderProfilePage(playerData) {
   const achSection = el('div', { className: 'profile-section' });
   achSection.appendChild(el('h3', { className: 'profile-section__title', textContent: '🏆 Achievements' }));
 
-  const achievements = achievementManager.getAllWithStatus(playerData.achievements || []);
+  const achievements = achievementManager.getAllWithStatus(fullData.achievements || []);
   const achGrid = el('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--space-3)' } });
 
   for (const ach of achievements) {
@@ -78,21 +79,21 @@ export function renderProfilePage(playerData) {
   const settingsSection = el('div', { className: 'profile-section' });
   settingsSection.appendChild(el('h3', { className: 'profile-section__title', textContent: '⚙️ Settings' }));
 
+  const settings = fullData.settings || {};
+
   // Theme toggle
   const themeToggle = el('div', { className: 'flex items-center justify-between p-4 bg-glass rounded-lg mb-3' }, [
     el('div', {}, [
       el('div', { className: 'font-semibold', textContent: 'Theme' }),
-      el('div', { className: 'text-sm text-muted', textContent: playerData.settings?.theme === 'dark' ? 'Dark Mode' : 'Light Mode' }),
+      el('div', { className: 'text-sm text-muted', textContent: settings.theme === 'dark' ? 'Dark Mode' : 'Light Mode' }),
     ]),
     el('button', {
       className: 'theme-toggle',
-      textContent: playerData.settings?.theme === 'dark' ? '☀️' : '🌙',
+      textContent: settings.theme === 'dark' ? '☀️' : '🌙',
       onClick: () => {
-        const newTheme = playerData.settings?.theme === 'dark' ? 'light' : 'dark';
-        playerData.settings = playerData.settings || {};
-        playerData.settings.theme = newTheme;
-        const fullData = storageService.load();
-        fullData.settings = playerData.settings;
+        const newTheme = settings.theme === 'dark' ? 'light' : 'dark';
+        settings.theme = newTheme;
+        fullData.settings = settings;
         storageService.save(fullData);
 
         document.documentElement.setAttribute('data-theme', newTheme);
@@ -107,18 +108,16 @@ export function renderProfilePage(playerData) {
   const soundToggle = el('div', { className: 'flex items-center justify-between p-4 bg-glass rounded-lg mb-3' }, [
     el('div', {}, [
       el('div', { className: 'font-semibold', textContent: 'Sound Effects' }),
-      el('div', { className: 'text-sm text-muted', textContent: playerData.settings?.soundEffects !== false ? 'On' : 'Off' }),
+      el('div', { className: 'text-sm text-muted', textContent: settings.soundEffects !== false ? 'On' : 'Off' }),
     ]),
     el('button', {
       className: 'btn btn--secondary btn--sm',
-      textContent: playerData.settings?.soundEffects !== false ? 'Disable' : 'Enable',
+      textContent: settings.soundEffects !== false ? 'Disable' : 'Enable',
       onClick: () => {
-        playerData.settings = playerData.settings || {};
-        playerData.settings.soundEffects = playerData.settings.soundEffects === false;
-        const fullData = storageService.load();
-        fullData.settings = playerData.settings;
+        settings.soundEffects = settings.soundEffects === false;
+        fullData.settings = settings;
         storageService.save(fullData);
-        notifications.show({ message: `Sound effects ${playerData.settings.soundEffects !== false ? 'enabled' : 'disabled'}`, type: 'info' });
+        notifications.show({ message: `Sound effects ${settings.soundEffects !== false ? 'enabled' : 'disabled'}`, type: 'info' });
       },
     }),
   ]);

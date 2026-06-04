@@ -5,16 +5,18 @@
  */
 
 import { el, formatNumber } from '../core/helpers.js';
+import { storageService } from '../services/storageService.js';
 
 export function renderLeaderboardPage(playerData) {
   const container = el('div', { className: 'page-enter' });
+  const fullData = storageService.load();
 
   // ─── Leaderboard ───
   const boardSection = el('div', { className: 'profile-section' });
   boardSection.appendChild(el('h3', { className: 'profile-section__title', textContent: '🏅 Leaderboard' }));
 
   // Build leaderboard from stored data + current player
-  const entries = [...(playerData.leaderboard || [])];
+  const entries = [...(fullData.leaderboard || [])];
   // Ensure current player is in the leaderboard
   const currentEntry = {
     name: playerData.name || 'You',

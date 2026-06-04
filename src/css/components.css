@@ -584,16 +584,36 @@
 }
 
 .memory-card__front {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--color-primary);
   color: #fff;
   font-size: 2rem;
+  font-weight: var(--font-weight-bold);
 }
 
 .memory-card__back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--bg-card);
   border: 2px solid var(--border-color-strong);
   color: var(--text-primary);
   transform: rotateY(180deg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  padding: var(--space-2);
+  text-align: center;
+  word-break: break-word;
 }
 
 .memory-card--matched .memory-card__back {

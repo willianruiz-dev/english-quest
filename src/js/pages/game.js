@@ -246,8 +246,8 @@ async function _handleAnswer(btn, selectedOpt, questionArea, question, mode) {
 
   // Update score display
   const scoreSpan = document.querySelector('.game-area .text-2xl');
-  if (scoreSpan && result) {
-    scoreSpan.textContent = result.score || gameEngine.score;
+  if (scoreSpan) {
+    scoreSpan.textContent = gameEngine.score;
   }
 
   if (result.xp) notifications.showXP(result.xp, result.coins);
@@ -404,15 +404,9 @@ function _showGameOverModal(result, mode, container) {
     el('button', {
       className: 'btn btn--primary',
       textContent: 'Play Again',
-      onClick: async () => {
+      onClick: () => {
         modal.close();
-        // Re-render the game page
-        const content = document.querySelector('.app__content');
-        if (content) {
-          content.innerHTML = '';
-          const newPage = await renderGamePage(mode, {});
-          content.appendChild(newPage);
-        }
+        window.dispatchEvent(new CustomEvent('navigate', { detail: { page: 'game', mode } }));
       },
     }),
   ]);
