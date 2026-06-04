@@ -1,0 +1,175 @@
+/* ═══════════════════════════════════════════════
+   ENGLISH QUEST — Animations
+   Keyframe animations, transitions, and micro-interactions
+   ═══════════════════════════════════════════════ */
+
+/* ─── Fade In ─── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ─── Slide In ─── */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ─── Bounce ─── */
+@keyframes bounceIn {
+  0%   { opacity: 0; transform: scale(0.3); }
+  50%  { opacity: 1; transform: scale(1.05); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+/* ─── Pulse ─── */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+
+@keyframes pulse-danger {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px var(--color-primary); }
+  50%      { box-shadow: 0 0 20px var(--color-primary), 0 0 40px var(--color-primary); }
+}
+
+/* ─── Shimmer (loading / XP bar) ─── */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ─── Spin ─── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── Shake (error feedback) ─── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 90% { transform: translateX(-4px); }
+  30%, 70% { transform: translateX(4px); }
+  50%      { transform: translateX(-2px); }
+}
+
+/* ─── Float ─── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+/* ─── Confetti-like sparkle ─── */
+@keyframes sparkle {
+  0%   { opacity: 0; transform: scale(0) rotate(0deg); }
+  50%  { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.5) rotate(180deg); }
+}
+
+/* ─── Streak Fire ─── */
+@keyframes fire {
+  0%, 100% { filter: drop-shadow(0 0 2px #FF6B35); }
+  50%      { filter: drop-shadow(0 0 8px #FF6B35) drop-shadow(0 0 16px #FF4500); }
+}
+
+/* ─── Level Up Celebration ─── */
+@keyframes levelUpBurst {
+  0%   { transform: scale(0); opacity: 0; }
+  50%  { opacity: 1; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+/* ─── Card Flip (Memory Game) ─── */
+@keyframes cardFlipIn {
+  from { transform: rotateY(90deg); opacity: 0; }
+  to   { transform: rotateY(0deg); opacity: 1; }
+}
+
+/* ─── Progress Bar Pulse ─── */
+@keyframes progressPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.7; }
+}
+
+/* ─── Utility Animation Classes ─── */
+.animate-fade-in       { animation: fadeIn 0.3s ease forwards; }
+.animate-fade-in-up    { animation: fadeInUp 0.4s ease forwards; }
+.animate-fade-in-down  { animation: fadeInDown 0.4s ease forwards; }
+.animate-fade-in-scale { animation: fadeInScale 0.3s ease forwards; }
+.animate-slide-left    { animation: slideInLeft 0.4s ease forwards; }
+.animate-slide-right   { animation: slideInRight 0.4s ease forwards; }
+.animate-bounce-in     { animation: bounceIn 0.5s ease forwards; }
+.animate-pulse         { animation: pulse 2s ease-in-out infinite; }
+.animate-shake         { animation: shake 0.5s ease; }
+.animate-float         { animation: float 3s ease-in-out infinite; }
+.animate-spin          { animation: spin 1s linear infinite; }
+.animate-sparkle       { animation: sparkle 0.6s ease-out forwards; }
+.animate-fire          { animation: fire 1s ease-in-out infinite; }
+
+/* ─── Stagger children animations ─── */
+.stagger-children > * {
+  opacity: 0;
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+.stagger-children > *:nth-child(1)  { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2)  { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3)  { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4)  { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5)  { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6)  { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7)  { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8)  { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(9)  { animation-delay: 0.45s; }
+.stagger-children > *:nth-child(10) { animation-delay: 0.5s; }
+
+/* ─── Page Transition ─── */
+.page-enter {
+  animation: fadeInUp 0.35s ease forwards;
+}
+
+.page-exit {
+  animation: fadeIn 0.2s ease reverse forwards;
+}
+
+/* ─── XP Pop Animation ─── */
+@keyframes xpPop {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  50%  { opacity: 1; transform: translateY(-15px) scale(1.3); }
+  100% { opacity: 0; transform: translateY(-30px) scale(0.8); }
+}
+
+.xp-pop {
+  position: absolute;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-xp);
+  pointer-events: none;
+  animation: xpPop 1s ease-out forwards;
+  font-size: var(--font-size-lg);
+}

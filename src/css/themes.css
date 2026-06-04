@@ -1,0 +1,61 @@
+/* ═══════════════════════════════════════════════
+   ENGLISH QUEST — Themes CSS
+   Dark/Light theme and high contrast mode
+   ═══════════════════════════════════════════════ */
+
+/* ─── High Contrast Mode (WCAG AAA) ─── */
+[data-high-contrast="true"] {
+  --bg-primary:           #000000;
+  --bg-secondary:         #111111;
+  --bg-tertiary:          #222222;
+  --bg-card:              #111111;
+  --bg-card-hover:        #222222;
+  --bg-glass:             #000000;
+  --text-primary:         #FFFFFF;
+  --text-secondary:       #DDDDDD;
+  --text-tertiary:        #BBBBBB;
+  --border-color:         #444444;
+  --border-color-strong:  #666666;
+  --color-primary:        #00FF00;
+  --color-primary-dark:   #00CC00;
+  --color-secondary:      #00BFFF;
+  --color-accent:         #FFA500;
+  --color-danger:         #FF4444;
+}
+
+[data-high-contrast="true"] .glass-card {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color-strong);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+[data-high-contrast="true"] .option-btn,
+[data-high-contrast="true"] .btn--secondary {
+  border: 2px solid var(--border-color-strong);
+}
+
+[data-high-contrast="true"] :focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+/* ─── Reduced Motion Override ─── */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ─── Font Size Scaling ─── */
+[data-font-scale="small"]  { --font-scale: 0.9; }
+[data-font-scale="medium"] { --font-scale: 1.0; }
+[data-font-scale="large"]  { --font-scale: 1.15; }
+[data-font-scale="xlarge"] { --font-scale: 1.3; }
+
+[data-font-scale] body {
+  font-size: calc(var(--font-size-base) * var(--font-scale));
+}

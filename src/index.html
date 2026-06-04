@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="English Quest — Learn English through gamified RPG quests. Translation, Memory, Writing, Listening & Time Attack modes.">
+  <meta name="theme-color" content="#0F172A">
+  <meta name="color-scheme" content="dark light">
+
+  <title>English Quest — RPG Language Learning</title>
+
+  <!-- Favicon (emoji-based) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏰</text></svg>">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/themes.css">
+
+  <!-- Preload critical assets -->
+  <link rel="preload" href="js/app.js" as="script">
+</head>
+<body>
+  <!-- ═══════════════════════════════════════
+       APP SHELL
+       ═══════════════════════════════════════ -->
+  <div class="app">
+
+    <!-- ─── Mobile Menu Button ─── -->
+    <button class="mobile-menu-btn" aria-label="Toggle menu" style="position: fixed; top: 12px; left: 12px; z-index: 150;">
+      ☰
+    </button>
+
+    <!-- ─── Sidebar Navigation ─── -->
+    <aside class="app__sidebar" role="navigation" aria-label="Main navigation">
+      <nav class="sidebar">
+        <a class="sidebar__logo" href="#" data-page="home">
+          <span class="sidebar__logo-icon">🏰</span>
+          <span>English Quest</span>
+        </a>
+
+        <div class="sidebar__nav">
+          <button class="sidebar__link sidebar__link--active" data-page="home">
+            <span class="sidebar__link-icon">🏠</span>
+            <span>Dashboard</span>
+          </button>
+          <button class="sidebar__link" data-page="game">
+            <span class="sidebar__link-icon">⚔️</span>
+            <span>Play Quest</span>
+          </button>
+          <button class="sidebar__link" data-page="profile">
+            <span class="sidebar__link-icon">👤</span>
+            <span>Profile</span>
+          </button>
+          <button class="sidebar__link" data-page="leaderboard">
+            <span class="sidebar__link-icon">🏆</span>
+            <span>Leaderboard</span>
+          </button>
+        </div>
+
+        <div class="sidebar__footer">
+          <button class="theme-toggle" aria-label="Toggle theme" title="Toggle light/dark mode">
+            ☀️
+          </button>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ─── Main Content Area ─── -->
+    <main class="app__main">
+      <!-- Header -->
+      <header class="app__header">
+        <div class="header">
+          <div class="header__left">
+            <h1 class="header__title">Dashboard</h1>
+          </div>
+          <div class="header__right">
+            <div class="header__stat header-xp" aria-label="Experience points">0 XP</div>
+            <div class="header__stat header-coins" aria-label="Coins">🪙 0</div>
+            <div class="header__stat header-streak" aria-label="Daily streak">🔥 0</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dynamic Content -->
+      <div class="app__content" role="main">
+        <!-- Loading state -->
+        <div class="text-center p-8" style="padding-top: var(--space-20);">
+          <div class="animate-spin" style="font-size: 3rem; display: inline-block;">⚔️</div>
+          <p class="text-muted mt-4">Loading your adventure...</p>
+        </div>
+      </div>
+    </main>
+
+  </div> <!-- /app -->
+
+  <!-- ═══════════════════════════════════════
+       APPLICATION SCRIPT (ES Module)
+       ═══════════════════════════════════════ -->
+  <script type="module" src="js/app.js"></script>
+
+  <!-- Noscript fallback -->
+  <noscript>
+    <div style="padding: 2rem; text-align: center; font-family: system-ui;">
+      <h1>🏰 English Quest</h1>
+      <p>JavaScript is required to play. Please enable JavaScript in your browser settings.</p>
+    </div>
+  </noscript>
+</body>
+</html>
