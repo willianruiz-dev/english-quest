@@ -4,12 +4,11 @@
  * Supports all 5 game modes via the GameEngine.
  */
 
-import { el, formatNumber } from '../core/helpers.js';
 import { GAME_MODES, UI } from '../core/constants.js';
+import { el } from '../core/helpers.js';
 import { gameEngine } from '../game/gameEngine.js';
-import { notifications } from '../ui/notifications.js';
 import { modal } from '../ui/modal.js';
-import { audioService } from '../services/audioService.js';
+import { notifications } from '../ui/notifications.js';
 
 /**
  * Render the game page for a specific mode.
@@ -63,9 +62,11 @@ export async function renderGamePage(mode, playerData) {
   try {
     const gameState = await gameEngine.startGame(mode);
 
-    // Memory mode has completely different rendering
+    // Special mode rendering
     if (mode === GAME_MODES.MEMORY) {
       _renderMemoryGame(questionArea, gameState, gameArea, scoreEl, container, mode, playerData);
+    } else if (mode === GAME_MODES.DEEP_SEEK) {
+      _renderDeepSeekMode(questionArea, gameState, container);
     } else {
       _renderQuestion(questionArea, gameState, mode, gameArea);
     }
@@ -169,6 +170,76 @@ function _renderQuestion(questionArea, question, mode, gameArea) {
       optionsGrid.appendChild(btn);
     }
     questionArea.appendChild(optionsGrid);
+  }
+}
+
+function _renderDeepSeekMode(questionArea, gameState, container, selectedResult = null) {
+  questionArea.innerHTML = '';
+
+  const intro = el('div', { className: 'mb-6' }, [
+    el('p', { className: 'text-muted mb-2', textContent: 'Search the vocabulary bank and discover new words with Deep Seek.' }),
+    el('p', { className: 'text-sm text-muted', textContent: 'Each new discovery gives you XP and coins while you learn.' }),
+  ]);
+  questionArea.appendChild(intro);
+
+  const form = el('form', { className: 'deep-seek-form mb-6' });
+  const input = el('input', {
+    className: 'writing-input',
+    type: 'search',
+    placeholder: 'Search for a word, translation, or category',
+    autocomplete: 'off',
+    autocapitalize: 'off',
+    spellcheck: 'false',
+    value: gameState.query || '',
+  });
+  const button = el('button', { className: 'btn btn--primary ml-3', type: 'submit', textContent: 'Seek' });
+  form.appendChild(input);
+  form.appendChild(button);
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nextState = await gameEngine.searchDeepSeek(input.value);
+    _renderDeepSeekMode(questionArea, nextState, container);
+  });
+  questionArea.appendChild(form);
+
+  if (!gameState.results || gameState.results.length === 0) {
+    questionArea.appendChild(el('p', {
+      className: 'text-muted',
+      textContent: gameState.query
+        ? 'No matches found. Try a different search term.'
+        : 'Search for a word to begin your Deep Seek quest.',
+    }));
+    return;
+  }
+
+  const list = el('div', { className: 'grid gap-3' },
+    gameState.results.map(word => el('button', {
+      className: 'game-card game-card--link text-left',
+      type: 'button',
+      onClick: async () => {
+        const selected = await gameEngine.selectDeepSeekWord(word.english);
+        _renderDeepSeekMode(questionArea, gameState, container, selected);
+      },
+    }, [
+      el('div', { className: 'font-bold', textContent: word.english }),
+      el('div', { className: 'text-sm text-muted', textContent: word.category }),
+      el('div', { className: 'text-xs text-muted', textContent: word.translation || 'Translation pending' }),
+    ])));
+
+  questionArea.appendChild(list);
+
+  if (selectedResult) {
+    const statusText = selectedResult.alreadyLearned
+      ? 'Already learned — keep exploring more words.'
+      : `Discovery reward: +${selectedResult.reward.xp} XP · +${selectedResult.reward.coins} coins`;
+
+    const detail = el('div', { className: 'glass-card mt-6 p-6' }, [
+      el('h4', { className: 'mb-2', textContent: `${selectedResult.word.english}` }),
+      el('p', { className: 'text-muted mb-2', textContent: `Category: ${selectedResult.word.category}` }),
+      el('p', { className: 'text-muted mb-2', textContent: `Translation: ${selectedResult.translation}` }),
+      el('p', { className: 'text-sm', textContent: statusText }),
+    ]);
+    questionArea.appendChild(detail);
   }
 }
 
@@ -419,10 +490,11 @@ function _showGameOverModal(result, mode, container) {
 function _getModeInfo(mode) {
   const map = {
     [GAME_MODES.TRANSLATION]: { title: 'Translation Quest', desc: 'Match English words to their Spanish translations', color: 'var(--color-primary)' },
-    [GAME_MODES.MEMORY]:      { title: 'Memory Challenge',  desc: 'Find matching English-Spanish pairs',           color: 'var(--color-secondary)' },
-    [GAME_MODES.WRITING]:     { title: 'Writing Quest',     desc: 'Type the Spanish translation',                   color: 'var(--color-accent)' },
-    [GAME_MODES.LISTENING]:   { title: 'Listening Quest',   desc: 'Hear the word and pick the correct translation',  color: 'var(--level-4)' },
-    [GAME_MODES.TIME_ATTACK]: { title: 'Time Attack!',      desc: '60 seconds — answer as many as you can!',         color: 'var(--color-danger)' },
+    [GAME_MODES.MEMORY]: { title: 'Memory Challenge', desc: 'Find matching English-Spanish pairs', color: 'var(--color-secondary)' },
+    [GAME_MODES.WRITING]: { title: 'Writing Quest', desc: 'Type the Spanish translation', color: 'var(--color-accent)' },
+    [GAME_MODES.LISTENING]: { title: 'Listening Quest', desc: 'Hear the word and pick the correct translation', color: 'var(--level-4)' },
+    [GAME_MODES.DEEP_SEEK]: { title: 'Deep Seek', desc: 'Search words, discover meanings, and earn rewards', color: 'var(--color-info)' },
+    [GAME_MODES.TIME_ATTACK]: { title: 'Time Attack!', desc: '60 seconds — answer as many as you can!', color: 'var(--color-danger)' },
   };
   return map[mode] || { title: 'Game', desc: '', color: 'var(--color-primary)' };
 }

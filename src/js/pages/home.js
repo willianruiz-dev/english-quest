@@ -3,8 +3,8 @@
  * Landing page: welcome message, game mode selection, quick stats.
  */
 
-import { el } from '../core/helpers.js';
 import { GAME_MODES } from '../core/constants.js';
+import { el } from '../core/helpers.js';
 import { dashboard } from '../ui/dashboard.js';
 
 export function renderHomePage(playerData) {
@@ -19,10 +19,11 @@ export function renderHomePage(playerData) {
 
   const modes = [
     { mode: GAME_MODES.TRANSLATION, icon: '📝', title: 'Translation', desc: 'Match English words to Spanish', color: '#58CC02' },
-    { mode: GAME_MODES.MEMORY,      icon: '🧠', title: 'Memory Cards',  desc: 'Find matching pairs',           color: '#1CB0F6' },
-    { mode: GAME_MODES.WRITING,     icon: '✍️', title: 'Writing',       desc: 'Type the translation',           color: '#FF9600' },
-    { mode: GAME_MODES.LISTENING,   icon: '🎧', title: 'Listening',     desc: 'Hear the word, pick the match',   color: '#9C27B0' },
-    { mode: GAME_MODES.TIME_ATTACK, icon: '⏱️', title: 'Time Attack',   desc: '60 seconds, max score!',          color: '#F44336' },
+    { mode: GAME_MODES.MEMORY, icon: '🧠', title: 'Memory Cards', desc: 'Find matching pairs', color: '#1CB0F6' },
+    { mode: GAME_MODES.WRITING, icon: '✍️', title: 'Writing', desc: 'Type the translation', color: '#FF9600' },
+    { mode: GAME_MODES.LISTENING, icon: '🎧', title: 'Listening', desc: 'Hear the word, pick the match', color: '#9C27B0' },
+    { mode: GAME_MODES.DEEP_SEEK, icon: '🔎', title: 'Deep Seek', desc: 'Explore vocabulary with intelligent search', color: '#00BFA5' },
+    { mode: GAME_MODES.TIME_ATTACK, icon: '⏱️', title: 'Time Attack', desc: '60 seconds, max score!', color: '#F44336' },
   ];
 
   const grid = el('div', { className: 'stagger-children', style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--space-4)' } });

@@ -1335,6 +1335,24 @@ export function getWordsByCategory(categoryName) {
   return WORDS.filter(w => w.category === categoryName);
 }
 
+/** Helper: search words by English text, Spanish translation, or category */
+export function searchWords(query = '', categoryName = null) {
+  const normalized = (query || '').trim().toLowerCase();
+  if (!normalized) return [];
+
+  return WORDS.filter(w => {
+    if (categoryName && w.category !== categoryName) return false;
+
+    const english = w.english.toLowerCase();
+    const translation = (w.translation || getPreloadedTranslation(w.english) || '').toLowerCase();
+    const category = (w.category || '').toLowerCase();
+
+    return english.includes(normalized)
+      || translation.includes(normalized)
+      || category.includes(normalized);
+  });
+}
+
 /** Helper: get random words (optionally from a category) */
 export function getRandomWords(count = 10, categoryName = null) {
   const pool = categoryName

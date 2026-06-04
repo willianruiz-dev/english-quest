@@ -6,15 +6,14 @@
  *        Dependency Inversion — depends on abstractions (services), not concretions.
  */
 
-import { GAME_MODES, UI, REWARDS } from '../core/constants.js';
-import { shuffle, pickRandom, el } from '../core/helpers.js';
-import { getRandomWords, getPreloadedTranslation } from '../repositories/wordRepository.js';
-import { translationService } from '../services/translationService.js';
+import { GAME_MODES, UI } from '../core/constants.js';
+import { pickRandom, shuffle } from '../core/helpers.js';
+import { getPreloadedTranslation, getRandomWords, searchWords } from '../repositories/wordRepository.js';
 import { audioService } from '../services/audioService.js';
 import { storageService } from '../services/storageService.js';
-import { scoreManager } from './scoreManager.js';
-import { levelManager } from './levelManager.js';
+import { translationService } from '../services/translationService.js';
 import { achievementManager } from './achievementManager.js';
+import { scoreManager } from './scoreManager.js';
 
 class GameEngine {
   constructor() {
@@ -32,6 +31,8 @@ class GameEngine {
     this.memoryCards = [];    // For memory mode
     this.memoryFlipped = [];
     this.memoryMatched = 0;
+    this.deepSeekQuery = '';
+    this.deepSeekResults = [];
   }
 
   // ─── Callback registration ───
@@ -56,6 +57,13 @@ class GameEngine {
   async startGame(mode, options = {}) {
     this.mode = mode;
     const questionCount = options.questionCount || (mode === GAME_MODES.MEMORY ? UI.MEMORY_PAIRS : UI.QUESTION_COUNT);
+
+    if (mode === GAME_MODES.DEEP_SEEK) {
+      this.deepSeekQuery = '';
+      this.deepSeekResults = getRandomWords(10);
+      this.isRunning = true;
+      return this._getDeepSeekState();
+    }
 
     // Fetch words
     this.words = getRandomWords(questionCount * 2, options.category || null); // Extra for distractor pool
@@ -88,6 +96,39 @@ class GameEngine {
     }
 
     return this._getCurrentQuestion();
+  }
+
+  /**
+   * Search words for Deep Seek mode.
+   */
+  async searchDeepSeek(query) {
+    if (this.mode !== GAME_MODES.DEEP_SEEK) return this._getDeepSeekState();
+    this.deepSeekQuery = (query || '').trim();
+    this.deepSeekResults = this.deepSeekQuery
+      ? searchWords(this.deepSeekQuery)
+      : getRandomWords(10);
+    return this._getDeepSeekState();
+  }
+
+  /**
+   * Select a word result in Deep Seek mode.
+   */
+  async selectDeepSeekWord(wordEnglish) {
+    if (this.mode !== GAME_MODES.DEEP_SEEK || !wordEnglish) return null;
+
+    const target = this.deepSeekResults.find(w => w.english.toLowerCase() === wordEnglish.toLowerCase());
+    if (!target) return null;
+
+    const alreadyLearned = scoreManager.data?.wordsLearnedIds.includes(target.english);
+    const translation = target.translation || getPreloadedTranslation(target.english) || target.english;
+    const reward = alreadyLearned ? null : scoreManager.awardDiscovery(target.english);
+
+    return {
+      word: target,
+      translation,
+      reward,
+      alreadyLearned,
+    };
   }
 
   /**
@@ -277,6 +318,14 @@ class GameEngine {
       matchedPairs: this.memoryMatched,
       totalPairs: this.totalQuestions,
       score: this.score,
+    };
+  }
+
+  _getDeepSeekState() {
+    return {
+      mode: GAME_MODES.DEEP_SEEK,
+      query: this.deepSeekQuery,
+      results: this.deepSeekResults.slice(0, 20),
     };
   }
 

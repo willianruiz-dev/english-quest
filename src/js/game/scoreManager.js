@@ -4,7 +4,7 @@
  * SOLID: Single Responsibility — ONLY handles scoring/RPG currency logic.
  */
 
-import { REWARDS, LEVELS } from '../core/constants.js';
+import { LEVELS, REWARDS } from '../core/constants.js';
 import { clamp } from '../core/helpers.js';
 import { storageService } from '../services/storageService.js';
 
@@ -55,6 +55,27 @@ class ScoreManager {
       xp,
       coins,
       streak: this.data.currentStreak,
+      ...(levelResult?.leveledUp ? { leveledUp: levelResult } : {}),
+    };
+  }
+
+  /**
+   * Award discovery points for exploring a new word.
+   * Does not affect streak, but still grants XP and coins.
+   */
+  awardDiscovery(wordId) {
+    if (!this.data) return null;
+
+    const xp = 5;
+    const coins = 2;
+    const levelResult = this._addXP(xp);
+    this._addCoins(coins);
+    this.learnWord(wordId);
+    this._save();
+
+    return {
+      xp,
+      coins,
       ...(levelResult?.leveledUp ? { leveledUp: levelResult } : {}),
     };
   }
