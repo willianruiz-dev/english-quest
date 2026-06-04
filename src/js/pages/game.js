@@ -61,8 +61,14 @@ export async function renderGamePage(mode, playerData) {
 
   // Start the game
   try {
-    const question = await gameEngine.startGame(mode);
-    _renderQuestion(questionArea, question, mode, gameArea);
+    const gameState = await gameEngine.startGame(mode);
+
+    // Memory mode has completely different rendering
+    if (mode === GAME_MODES.MEMORY) {
+      _renderMemoryGame(questionArea, gameState, gameArea, scoreEl, container, mode, playerData);
+    } else {
+      _renderQuestion(questionArea, gameState, mode, gameArea);
+    }
   } catch (err) {
     questionArea.innerHTML = '';
     questionArea.appendChild(
@@ -256,6 +262,93 @@ async function _handleAnswer(btn, selectedOpt, questionArea, question, mode) {
     const gArea = document.querySelector('.game-area');
     if (qArea && next) _renderQuestion(qArea, next, mode, gArea);
   }, 1200);
+}
+
+// ─── Memory Mode Rendering ───
+
+function _renderMemoryGame(questionArea, gameState, gameArea, scoreEl, container, mode, playerData) {
+  questionArea.innerHTML = '';
+
+  if (!gameState || gameState.gameOver) return;
+
+  // Progress indicator
+  const progressEl = el('div', { className: 'text-center text-sm text-muted mb-4', textContent: `Matched: ${gameState.matchedPairs} / ${gameState.totalPairs}` });
+  questionArea.appendChild(progressEl);
+
+  // Card grid
+  const cardGrid = el('div', { className: 'memory-grid' });
+  for (const card of gameState.cards) {
+    const cardEl = el('div', {
+      className: `memory-card ${card.flipped ? 'memory-card--flipped' : ''} ${card.matched ? 'memory-card--matched' : ''}`,
+      'data-card-id': card.id,
+      onClick: () => _handleMemoryFlip(cardEl, card.id, questionArea, gameArea, scoreEl, container, mode, playerData),
+    });
+    // Inner content (hidden when not flipped)
+    const inner = el('div', { className: 'memory-card__inner' });
+    const front = el('div', { className: 'memory-card__front', textContent: '?' });
+    const back = el('div', {
+      className: `memory-card__back ${card.type === 'english' ? 'memory-card__back--en' : 'memory-card__back--es'}`,
+      textContent: card.text,
+    });
+    inner.appendChild(front);
+    inner.appendChild(back);
+    cardEl.appendChild(inner);
+    cardGrid.appendChild(cardEl);
+  }
+  questionArea.appendChild(cardGrid);
+
+  // Score display
+  const memScore = el('div', { className: 'text-center mt-4 text-lg font-bold', textContent: `Score: ${gameState.score}` });
+  questionArea.appendChild(memScore);
+}
+
+async function _handleMemoryFlip(cardEl, cardId, questionArea, gameArea, scoreEl, container, mode, playerData) {
+  const result = gameEngine.flipMemoryCard(cardId);
+  if (!result) return;
+
+  // Flip the clicked card visually
+  if (result.card) {
+    cardEl.classList.add('memory-card--flipped');
+  }
+
+  if (result.cards && result.cards.length === 2) {
+    const [cardA, cardB] = result.cards;
+    const elA = questionArea.querySelector(`[data-card-id="${cardA.id}"]`);
+    const elB = questionArea.querySelector(`[data-card-id="${cardB.id}"]`);
+
+    if (elA) elA.classList.add('memory-card--flipped');
+    if (elB) elB.classList.add('memory-card--flipped');
+
+    if (result.match) {
+      // Match found
+      setTimeout(() => {
+        if (elA) elA.classList.add('memory-card--matched');
+        if (elB) elB.classList.add('memory-card--matched');
+      }, 500);
+
+      if (result.xp) notifications.showXP(result.xp, result.coins);
+      if (result.leveledUp) notifications.showLevelUp(result.leveledUp.to);
+
+      // Update score
+      const memScore = questionArea.querySelector('.text-lg');
+      if (memScore) memScore.textContent = `Score: ${result.score || gameEngine.score}`;
+
+      // Update match count
+      const progressEl = questionArea.querySelector('.text-muted');
+      if (progressEl) {
+        const matchedNow = gameEngine.memoryMatched;
+        progressEl.textContent = `Matched: ${matchedNow} / ${gameEngine.totalQuestions}`;
+      }
+
+      if (result.gameOver) return; // Modal handled by callback
+    } else {
+      // No match - flip back after delay
+      setTimeout(() => {
+        if (elA) elA.classList.remove('memory-card--flipped');
+        if (elB) elB.classList.remove('memory-card--flipped');
+      }, 800);
+    }
+  }
 }
 
 // ─── Game Over Modal ───

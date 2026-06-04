@@ -231,16 +231,16 @@ class GameEngine {
         b.matched = true;
         this.memoryMatched++;
         this.score += 10;
-        scoreManager.awardCorrectAnswer();
+        const rewards = scoreManager.awardCorrectAnswer();
         scoreManager.learnWord(a.pairId);
         this.memoryFlipped = [];
 
         if (this.memoryMatched >= this.totalQuestions) {
           const result = this._endGame();
-          return { cards: [a, b], match: true, gameOver: true, ...result };
+          return { cards: [a, b], match: true, gameOver: true, ...rewards, ...result };
         }
 
-        return { cards: [a, b], match: true, gameOver: false, score: this.score };
+        return { cards: [a, b], match: true, gameOver: false, score: this.score, ...rewards };
       } else {
         // No match - flip back after delay
         const cardsToFlip = [...this.memoryFlipped];

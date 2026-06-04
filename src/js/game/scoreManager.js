@@ -46,12 +46,17 @@ class ScoreManager {
       coins += REWARDS.STREAK_BONUS_5.coins;
     }
 
-    this._addXP(xp);
+    const levelResult = this._addXP(xp);
     this._addCoins(coins);
     this._updateLongestStreak();
     this._save();
 
-    return { xp, coins, streak: this.data.currentStreak };
+    return {
+      xp,
+      coins,
+      streak: this.data.currentStreak,
+      ...(levelResult?.leveledUp ? { leveledUp: levelResult } : {}),
+    };
   }
 
   /**
@@ -69,10 +74,14 @@ class ScoreManager {
    */
   awardPerfectRound() {
     if (!this.data) return null;
-    this._addXP(REWARDS.PERFECT_ROUND.xp);
+    const levelResult = this._addXP(REWARDS.PERFECT_ROUND.xp);
     this._addCoins(REWARDS.PERFECT_ROUND.coins);
     this._save();
-    return { xp: REWARDS.PERFECT_ROUND.xp, coins: REWARDS.PERFECT_ROUND.coins };
+    return {
+      xp: REWARDS.PERFECT_ROUND.xp,
+      coins: REWARDS.PERFECT_ROUND.coins,
+      ...(levelResult?.leveledUp ? { leveledUp: levelResult } : {}),
+    };
   }
 
   /**

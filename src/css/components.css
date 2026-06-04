@@ -601,6 +601,25 @@
   background: rgba(88, 204, 2, 0.15);
 }
 
+/* Memory card grid */
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-3);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.memory-card__back--en {
+  background: linear-gradient(135deg, var(--bg-card), rgba(28, 176, 246, 0.1));
+  border-color: #1CB0F6;
+}
+
+.memory-card__back--es {
+  background: linear-gradient(135deg, var(--bg-card), rgba(255, 150, 0, 0.1));
+  border-color: #FF9600;
+}
+
 /* ─── Writing Mode Input ─── */
 .writing-input {
   width: 100%;
